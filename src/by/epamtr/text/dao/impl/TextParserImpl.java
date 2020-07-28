@@ -18,7 +18,7 @@ import by.epamtr.text.entity.Sentance;
 import by.epamtr.text.entity.Word;
 
 public class TextParserImpl implements TextParserDAO {
-	private static final  String SENTANCE_PATTERN;
+	private static final String SENTANCE_PATTERN;
 	private static final String WORD_PATTERN;
 	private static final String BLOCK_CODE_PATTERN;
 	private static final String PARAGRAPH_PATTERN;
@@ -38,11 +38,10 @@ public class TextParserImpl implements TextParserDAO {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-			SENTANCE_PATTERN = property.getProperty("SENTANCE_PATTER");
-			WORD_PATTERN = property.getProperty("WORD_PATTERN ");
-			BLOCK_CODE_PATTERN = property.getProperty("BLOCK_CODE_PATTERN");
-			PARAGRAPH_PATTERN = property.getProperty("PARAGRAPH_PATTERN");
-		
+		SENTANCE_PATTERN = property.getProperty("SENTANCE_PATTER");
+		WORD_PATTERN = property.getProperty("WORD_PATTERN ");
+		BLOCK_CODE_PATTERN = property.getProperty("BLOCK_CODE_PATTERN");
+		PARAGRAPH_PATTERN = property.getProperty("PARAGRAPH_PATTERN");
 	}
 
 	public TextParserImpl() {
