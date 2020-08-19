@@ -1,11 +1,15 @@
 package by.epamtr.text.dao;
 
-import by.epamtr.text.dao.impl.TextParserImpl;
+import by.epamtr.text.dao.impl.ParagraphParser;
+import by.epamtr.text.dao.impl.SentanceParser;
+import by.epamtr.text.dao.impl.TextParser;
 
 public class TextParserDAOFactory {
 	private static final TextParserDAOFactory instance = new TextParserDAOFactory();
 
-	private final TextParserDAO textParserDAO = new TextParserImpl();
+	private final PartTextParserDAO textParserDAO = new TextParser();
+	private final PartTextParserDAO sentanceParserDAO=new SentanceParser();
+	private final PartTextParserDAO paragraphParserDAO=new ParagraphParser();
 	
 	private TextParserDAOFactory() {
 	}
@@ -14,10 +18,15 @@ public class TextParserDAOFactory {
 		return instance;
 	}
 
-	public TextParserDAO getTextParserDAO() {
-		return textParserDAO;
+	public TextParser getTextParserDAO() {
+		return (TextParser)textParserDAO;
 	}
 	
-	
+	public SentanceParser getSentanceParserDAO() {
+		return (SentanceParser)sentanceParserDAO;
+	}
 
+	public ParagraphParser getParagraphParserDAO() {
+		return (ParagraphParser)paragraphParserDAO;
+	}
 }

@@ -1,5 +1,7 @@
 package by.epamtr.text.entity;
 
-public interface PartText {
+import java.io.Serializable;
+
+public interface PartText extends Serializable {
 
 }

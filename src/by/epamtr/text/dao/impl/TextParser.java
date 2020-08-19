@@ -7,91 +7,72 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import by.epamtr.text.dao.PartTextDAOFactory;
-import by.epamtr.text.dao.TextParserDAO;
+import by.epamtr.text.dao.PartTextParserDAO;
+import by.epamtr.text.dao.TextParserDAOFactory;
+import by.epamtr.text.dao.exception.DAOException;
 import by.epamtr.text.entity.PartText;
 import by.epamtr.text.entity.Sentance;
 import by.epamtr.text.entity.Word;
 
-public class TextParserImpl implements TextParserDAO {
-	private static final String SENTANCE_PATTERN;
-	private static final String WORD_PATTERN;
-	private static final String BLOCK_CODE_PATTERN;
-	private static final String PARAGRAPH_PATTERN;
-	private Pattern sentancePattern;
-	private Pattern paragraphPattern;
+public class TextParser implements PartTextParserDAO {
 	private PartTextDAOFactory factory;
-	BufferedReader reader;
+	private TextParserDAOFactory parserFactory;
+	static BufferedReader reader;
 	private Matcher matcher;
+	Iterator<String> iterator;
+	private static String line="";
 
-	static {
-		FileInputStream fis;
-		Properties property = new Properties();
-
-		try {
-			fis = new FileInputStream("resources/regular.properties");
-			property.load(fis);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		SENTANCE_PATTERN = property.getProperty("SENTANCE_PATTER");
-		WORD_PATTERN = property.getProperty("WORD_PATTERN ");
-		BLOCK_CODE_PATTERN = property.getProperty("BLOCK_CODE_PATTERN");
-		PARAGRAPH_PATTERN = property.getProperty("PARAGRAPH_PATTERN");
-	}
-
-	public TextParserImpl() {
+	public TextParser() {
 		factory = PartTextDAOFactory.getInstance();
+
 	}
 
 	@Override
-	public PartText parse(String filePath) {
+	public PartText parse(String textFromFile) throws DAOException {
 		PartText text = null;
+		List<String> listOfString = devideTextOnString(textFromFile);
 		List<PartText> listPartText = new ArrayList<PartText>();
-		File file;
-		FileReader fileReader;
 		String line = "";
-		try {
-			file = new File(filePath);
-			fileReader = new FileReader(file);
-			reader = new BufferedReader(fileReader);
-			while ((line = reader.readLine()) != null) {
-				if (line.contains("{")) {
-					listPartText.add(parseCode(line, reader));
-				} else {
-					listPartText.add(parseParagraph(line, reader));
-				}
-			}
-			text = factory.getTextDAO().doPartText(listPartText);
-			return text;
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
+
+		iterator = listOfString.iterator();
+		while (iterator.hasNext()) {
+			line = (String) iterator.next();
+
 			try {
-				reader.close();
+				if (line.contains("{")) {
+					listPartText.add(parseCode(line, iterator));
+				} else {
+					listPartText.add(parseParagraph(line, iterator));
+					if (this.line.contains("{")) {
+						listPartText.add(parseCode(this.line, iterator));
+					}
+				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new DAOException("Error while parsing", e);
 			}
 		}
+		text = factory.getTextDAO().doPartText(listPartText);
 		return text;
 	}
 
-	private PartText parseCode(String line, BufferedReader reader) throws IOException {
+	private PartText parseCode(String line, Iterator<String> iterator) throws IOException {
 		StringBuilder partText = new StringBuilder();
 		PartText codeBlock;
-		int countOpenedHooks = numberOpenedHooks(line);
-		int countClosedHooks = numberClosedHooks(line);
+		int countOpenedHooks = countOpenedHooks(line);
+		int countClosedHooks = countClosedHooks(line);
 		partText.append(line);
 		if (countOpenedHooks != countClosedHooks) {
-			while ((line = reader.readLine()) != null) {
-				countOpenedHooks += numberOpenedHooks(line);
-				countClosedHooks += numberClosedHooks(line);
+			while ((iterator.hasNext())) {
+				line = iterator.next();
+				countOpenedHooks += countOpenedHooks(line);
+				countClosedHooks += countClosedHooks(line);
 				partText.append(line);
 				if (countOpenedHooks == countClosedHooks) {
 					codeBlock = factory.getCodeBlockDAO().doPartText(partText.toString());
@@ -103,7 +84,7 @@ public class TextParserImpl implements TextParserDAO {
 		return codeBlock;
 	}
 
-	private int numberOpenedHooks(String line) {
+	private int countOpenedHooks(String line) {
 		int count = 0;
 		for (int i = 0; i < line.length(); i++) {
 			if (line.charAt(i) == '{') {
@@ -113,7 +94,7 @@ public class TextParserImpl implements TextParserDAO {
 		return count;
 	}
 
-	private int numberClosedHooks(String line) {
+	private int countClosedHooks(String line) {
 		int count = 0;
 		for (int i = 0; i < line.length(); i++) {
 			if (line.charAt(i) == '}') {
@@ -123,17 +104,24 @@ public class TextParserImpl implements TextParserDAO {
 		return count;
 	}
 
-	private PartText parseParagraph(String line, BufferedReader reader) throws IOException {
+	private PartText parseParagraph(String line, Iterator<String> iterator) throws IOException {
 		PartText paragraph = null;
 		StringBuilder partTextParagraph = new StringBuilder();
 		partTextParagraph.append(line);
-		if (paragraphPattern.matches(PARAGRAPH_PATTERN, line)) {
+		if (PARAGRAPH_PATTERN.matcher(line).matches()) {
 			paragraph = factory.getParagraphDAO().doPartText(parseSentance(line));
 		} else {
-			while ((line = reader.readLine()) != null) {
-				partTextParagraph.append(line);
-				if (paragraphPattern.matches(PARAGRAPH_PATTERN, line)) {
+			while (iterator.hasNext()) {
+				line = iterator.next();
+				if (line.contains("{")) {
+					this.line=line;
 					paragraph = factory.getParagraphDAO().doPartText(parseSentance(partTextParagraph.toString()));
+					return paragraph;
+				}
+				partTextParagraph.append(line);
+				if (PARAGRAPH_PATTERN.matcher(partTextParagraph.toString()).matches()) {
+					paragraph = factory.getParagraphDAO().doPartText(parseSentance(partTextParagraph.toString()));
+					return paragraph;
 				}
 			}
 		}
@@ -142,7 +130,7 @@ public class TextParserImpl implements TextParserDAO {
 
 	private List<PartText> parseSentance(String paragraph) {
 		List<PartText> sentances = new ArrayList<PartText>();
-		matcher = sentancePattern.matcher(paragraph);
+		matcher = SENTANCE_PATTERN.matcher(paragraph);
 		while (matcher.find()) {
 			sentances.add(makeSentance(matcher.group()));
 		}
@@ -151,11 +139,18 @@ public class TextParserImpl implements TextParserDAO {
 
 	private Sentance makeSentance(String sentance) {
 		List<Word> words = new ArrayList<Word>();
-		Pattern wordPattern = Pattern.compile(WORD_PATTERN);
-		Matcher matcher = wordPattern.matcher(sentance);
+		Matcher matcher = WORD_PATTERN.matcher(sentance);
 		while (matcher.find()) {
 			words.add(new Word(matcher.group()));
 		}
 		return new Sentance(words);
+	}
+
+	private List<String> devideTextOnString(String wholeText) {
+		List<String> listOfString = Arrays.asList(wholeText.split("\n"));
+		for (int i = 0; i < listOfString.size(); i++) {
+			listOfString.set(i, listOfString.get(i) + "\\n");
+		}
+		return listOfString;
 	}
 }

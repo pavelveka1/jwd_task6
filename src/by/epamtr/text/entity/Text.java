@@ -2,7 +2,7 @@ package by.epamtr.text.entity;
 
 import java.util.List;
 
-public class Text {
+public class Text implements PartText {
 	private List<PartText> textElements;
 
 	public Text(List<PartText> textElements) {
@@ -41,6 +41,11 @@ public class Text {
 		} else if (!textElements.equals(other.textElements))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Text [textElements=" + textElements + "]";
 	}
 
 }
