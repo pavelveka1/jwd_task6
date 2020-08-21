@@ -15,6 +15,11 @@ public class Client {
 	private ObjectOutputStream out;
 	private String ip;
 	private int port;
+	private static final String GET_TEXT = "Get Text";
+	private static final String CHANGE_WORD_IN_SENTANCES = "change First And Last Word In Sentances";
+	private static final String DELITE_MAX_SUBSTRING="delite Max Substring";
+	private static final String CHANGE_WORD_WITH_SUBSTRING="change Word With Substring";
+	private static final String ASSEMBLE_TEXT_FROM_PARTS="assemble Text From Parts";
 
 	public Client(String ip, int port) {
 		this.ip = ip;
@@ -39,7 +44,7 @@ public class Client {
 	public Text getText() throws ClientException {
 
 		try {
-			out.writeObject(new String("Get Text"));
+			out.writeObject(GET_TEXT);
 		} catch (IOException e) {
 			throw new ClientException("Error while sending object to server", e);
 		}
@@ -55,7 +60,7 @@ public class Client {
 
 	public Text changeFirstAndLastWordInSentances() throws ClientException {
 		try {
-			out.writeObject(new String("change First And Last Word In Sentances"));
+			out.writeObject(CHANGE_WORD_IN_SENTANCES);
 		} catch (IOException e) {
 			throw new ClientException("Error while sending object to server", e);
 		}

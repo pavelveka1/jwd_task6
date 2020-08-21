@@ -14,6 +14,9 @@ import by.epamtr.text.service.exception.ServiceException;
 public class ClientManager implements Runnable {
 	private static final String GET_TEXT = "Get Text";
 	private static final String CHANGE_WORD_IN_SENTANCES = "change First And Last Word In Sentances";
+	private static final String DELITE_MAX_SUBSTRING="delite Max Substring";
+	private static final String CHANGE_WORD_WITH_SUBSTRING="change Word With Substring";
+	private static final String ASSEMBLE_TEXT_FROM_PARTS="assemble Text From Parts";
 
 	private Socket socket;
 	private ObjectInputStream in;
