@@ -7,8 +7,9 @@ public class MainClient {
 		Client client = new Client("localhost", 4004);
 		try {
 			client.start();
-			System.out.println(client.getText());
-			System.out.println(client.changeFirstAndLastWordInSentances());
+		//	System.out.println(client.getText());
+		//	System.out.println(client.changeFirstAndLastWordInSentances());
+			System.out.println(client.deliteMaxSubstring("К", "а"));
 		} catch (ClientException e) {
 			e.printStackTrace();
 		}

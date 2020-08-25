@@ -19,7 +19,7 @@ public class TextProcessorServiceImpl implements TextProcessorService {
 	public Text changeFirstAndLastWordInSentance(Text text) {
 
 		for (PartText partText : text.getTextElements()) {
-			if (partText.getClass().getSimpleName() == "Paragraph") {
+			if (partText.getClass().getSimpleName().equalsIgnoreCase("Paragraph".trim())) {
 				for (PartText sentance : ((Paragraph) partText).getSentances()) {
 					changeFirstAndLastWord((Sentance) sentance);
 				}
@@ -36,18 +36,24 @@ public class TextProcessorServiceImpl implements TextProcessorService {
 	}
 
 	@Override
-	public String deliteMaxSubstring(Text text, char begin, char end) {
+	public String deliteMaxSubstring(Text text, String begin, String end) {
+		int maxSubstring = 0;
 		for (PartText partText : text.getTextElements()) {
-			if (partText.getClass().getSimpleName() == "Paragraph") {
+			if (partText.getClass().getSimpleName().equalsIgnoreCase("Paragraph".trim())) {
 				for (PartText sentance : ((Paragraph) partText).getSentances()) {
 					String unitedWords = doSentanceFromWords((Sentance) sentance);
-					String changedString = deliteSubstring(unitedWords, begin, end);
-					Sentance newSentance=(Sentance) TextParserDAOFactory.getInstance().getSentanceParserDAO().parse(changedString);
-					((Sentance)sentance).setWords(newSentance.getWords());
+					int beginIndex = unitedWords.indexOf( begin);
+					int endIndex = unitedWords.lastIndexOf(end);
+					if (beginIndex < 0 || endIndex < 0) {
+						continue;
+					}
+					if (maxSubstring < (endIndex - beginIndex)) {
+						maxSubstring = endIndex - beginIndex;
+					}
 				}
 			}
 		}
-		return null;
+		return deliteSubstring(text, maxSubstring, begin, end);
 	}
 
 	private String doSentanceFromWords(Sentance sentance) {
@@ -59,31 +65,36 @@ public class TextProcessorServiceImpl implements TextProcessorService {
 		return stringBuilder.toString();
 	}
 
-	private String deliteSubstring(String sentance, char begin, char end) {
-		int beginIndex = 0;
-		int endIndex = sentance.length() - 1;
-		for (int i = 0; i < sentance.length(); i++) {
-			if (sentance.charAt(i) == begin) {
-				beginIndex = i;
-				break;
+	private String deliteSubstring(Text text, int maxSubstring, String begin, String end) {
+		for (PartText partText : text.getTextElements()) {
+			if (partText.getClass().getSimpleName().equalsIgnoreCase("Paragraph".trim())) {
+				for (PartText sentance : ((Paragraph) partText).getSentances()) {
+					String unitedWords = doSentanceFromWords((Sentance) sentance);
+					int beginIndex = unitedWords.indexOf( begin);
+					int endIndex = unitedWords.lastIndexOf( end);
+					if (beginIndex < 0 || endIndex < 0) {
+						continue;
+					}
+					if (maxSubstring == (endIndex - beginIndex)) {
+						String substring = unitedWords.substring(beginIndex, endIndex);
+						unitedWords = unitedWords.replace(substring, "");
+						Sentance newSentance = (Sentance) TextParserDAOFactory.getInstance().getSentanceParserDAO()
+								.parse(unitedWords);
+						((Sentance) sentance).setWords(newSentance.getWords());
+						return substring;
+					} else {
+						continue;
+					}
+				}
 			}
 		}
-		for (int j = sentance.length() - 1; j >= 0; j--) {
-			if (sentance.charAt(j) == end) {
-				endIndex = j;
-				break;
-			}
-		}
-		if (endIndex < beginIndex) {
-			return sentance;
-		}
-		return new StringBuilder(sentance).replace(beginIndex, endIndex, "").toString();
+		return "";
 	}
 
 	@Override
 	public String changeWordWithSubstring(Sentance sentance, int length, String substring) {
-		for(Word word:sentance.getWords()) {
-			if(word.getWord().length()==length) {
+		for (Word word : sentance.getWords()) {
+			if (word.getWord().length() == length) {
 				word.setWord(substring);
 			}
 		}
@@ -92,17 +103,17 @@ public class TextProcessorServiceImpl implements TextProcessorService {
 
 	@Override
 	public String assembleTextFromParts(Text text) {
-		for(PartText partText:text.getTextElements()) {
-			if(partText.getClass().getSimpleName()==Paragraph.class.getSimpleName()) {
-				for(Sentance sentance:((Paragraph)partText).getSentances()) {
-					for(Word word:sentance.getWords()) {
-						System.out.print(word.getWord()+" ");
+		for (PartText partText : text.getTextElements()) {
+			if (partText.getClass().getSimpleName() == Paragraph.class.getSimpleName()) {
+				for (Sentance sentance : ((Paragraph) partText).getSentances()) {
+					for (Word word : sentance.getWords()) {
+						System.out.print(word.getWord() + " ");
 					}
 				}
-			}else {
+			} else {
 				Pattern pattern = Pattern.compile("\\n");
-				List<String> codeLines=Arrays.asList(pattern.split(((CodeBlock)partText).getCode()));
-				for(String codeLine:codeLines) {
+				List<String> codeLines = Arrays.asList(pattern.split(((CodeBlock) partText).getCode()));
+				for (String codeLine : codeLines) {
 					System.out.println(codeLine);
 				}
 			}

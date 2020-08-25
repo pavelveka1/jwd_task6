@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import by.epamtr.text.client.exception.ClientException;
+import by.epamtr.text.entity.Request;
 import by.epamtr.text.entity.Sentance;
 import by.epamtr.text.entity.Text;
 
@@ -44,7 +45,7 @@ public class Client {
 	public Text getText() throws ClientException {
 
 		try {
-			out.writeObject(GET_TEXT);
+			out.writeObject(new Request(GET_TEXT));
 		} catch (IOException e) {
 			throw new ClientException("Error while sending object to server", e);
 		}
@@ -60,7 +61,7 @@ public class Client {
 
 	public Text changeFirstAndLastWordInSentances() throws ClientException {
 		try {
-			out.writeObject(CHANGE_WORD_IN_SENTANCES);
+			out.writeObject(new Request(CHANGE_WORD_IN_SENTANCES));
 		} catch (IOException e) {
 			throw new ClientException("Error while sending object to server", e);
 		}
@@ -74,9 +75,21 @@ public class Client {
 		return text;
 	}
 
-	public String deliteMaxSubstring(char begin, char end) {
-		return null;
-
+	public String deliteMaxSubstring(String begin, String end) throws ClientException {
+		String delitedString=null;
+		try {
+			out.writeObject(new Request(DELITE_MAX_SUBSTRING, begin, end));
+		} catch (IOException e) {
+			throw new ClientException("Error while sending object to server", e);
+		}
+		try {
+			 delitedString= (String) in.readObject();
+		} catch (ClassNotFoundException e1) {
+			throw new ClientException("Error while cast object to Text", e1);
+		} catch (IOException e1) {
+			throw new ClientException("Error while reading object from server", e1);
+		}
+		return delitedString;
 	}
 
 	public String changeWordWithSubstring(Sentance sentance, int length, String substring) {

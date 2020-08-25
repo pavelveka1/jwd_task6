@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import by.epamtr.text.controller.exception.ServerControllerException;
+import by.epamtr.text.entity.Request;
 import by.epamtr.text.entity.Text;
 import by.epamtr.text.service.ServiceFactory;
 import by.epamtr.text.service.TextProcessorService;
@@ -28,13 +29,13 @@ public class ClientManager implements Runnable {
 
 	@Override
 	public void run() {
-		String request = null;
+		Request request = null;
 		try {
 
 			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new ObjectInputStream(socket.getInputStream());
 			try {
-				request = (String) in.readObject();
+				request = (Request) in.readObject();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -58,26 +59,33 @@ public class ClientManager implements Runnable {
 		}
 	}
 
-	private void doAction(String action) throws ServerControllerException {
+	private void doAction(Request request) throws ServerControllerException {
 		Text text = null;
 		ServiceFactory factory = ServiceFactory.getInstance();
 		TextService textService = factory.getTextService();
+		TextProcessorService textProcessor=factory.getTextProcessorService();
 		try {
 			text = textService.parseText("c:\\Users\\HP\\Desktop\\textprocessor.txt");
 		} catch (ServiceException e) {
 			e.printStackTrace();
 		}
-		if (action.equalsIgnoreCase(GET_TEXT)) {
+		if (request.getRequest().equalsIgnoreCase(GET_TEXT)) {
 			try {
 				out.writeObject(text);
 			} catch (IOException e) {
 				throw new ServerControllerException("Error while sending object to client", e);
 			}
-		} else if (action.equalsIgnoreCase(CHANGE_WORD_IN_SENTANCES)) {
-			TextProcessorService textProcessor=factory.getTextProcessorService();
+		} else if (request.getRequest().equalsIgnoreCase(CHANGE_WORD_IN_SENTANCES)) {
 			text=textProcessor.changeFirstAndLastWordInSentance(text);
 			try {
 				out.writeObject(text);
+			} catch (IOException e) {
+				throw new ServerControllerException("Error while sending object to client", e);
+			}
+		}else if(request.getRequest().equalsIgnoreCase(DELITE_MAX_SUBSTRING)) {
+			String delitedString=textProcessor.deliteMaxSubstring(text, (String)request.getParam1(), (String)request.getParam2());
+			try {
+				out.writeObject(delitedString);
 			} catch (IOException e) {
 				throw new ServerControllerException("Error while sending object to client", e);
 			}
