@@ -21,6 +21,7 @@ public class Client {
 	private static final String DELITE_MAX_SUBSTRING="delite Max Substring";
 	private static final String CHANGE_WORD_WITH_SUBSTRING="change Word With Substring";
 	private static final String ASSEMBLE_TEXT_FROM_PARTS="assemble Text From Parts";
+	private static final String BREAK_CONNECTION="stop";
 
 	public Client(String ip, int port) {
 		this.ip = ip;
@@ -92,19 +93,47 @@ public class Client {
 		return delitedString;
 	}
 
-	public String changeWordWithSubstring(Sentance sentance, int length, String substring) {
-		return substring;
+	public String changeWordWithSubstring(Sentance sentance, int length, String substring) throws ClientException {
+		String changedSentance=null;
+		try {
+			out.writeObject(new Request(CHANGE_WORD_WITH_SUBSTRING, sentance, length, substring));
+		} catch (IOException e) {
+			throw new ClientException("Error while sending object to server", e);
+		}
+		try {
+			changedSentance=(String) in.readObject();
+		} catch (ClassNotFoundException e1) {
+			throw new ClientException("Error while cast object to Text", e1);
+		} catch (IOException e1) {
+			throw new ClientException("Error while reading object from server", e1);
+		}
+		return changedSentance;
 
 	}
 
-	public String assembleTextFromParts(Text text) {
-		return null;
+	public String assembleTextFromParts(Text text) throws ClientException {
+		String originalText=null;
+		try {
+			out.writeObject(new Request(ASSEMBLE_TEXT_FROM_PARTS, text));
+		} catch (IOException e) {
+			throw new ClientException("Error while sending object to server", e);
+		}
+		try {
+			originalText=(String)in.readObject();
+		}catch (ClassNotFoundException e1) {
+			throw new ClientException("Error while cast object to Text", e1);
+		} catch (IOException e1) {
+			throw new ClientException("Error while reading object from server", e1);
+		}
+		return originalText;
 
 	}
 
 	public void disconnect() throws ClientException {
+		
 		if (socket != null) {
 			try {
+				out.writeObject(new Request(BREAK_CONNECTION));
 				socket.close();
 			} catch (IOException e) {
 				throw new ClientException("Error while trying close socket", e);

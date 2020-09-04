@@ -14,12 +14,13 @@ import by.epamtr.text.entity.Word;
 import by.epamtr.text.service.TextProcessorService;
 
 public class TextProcessorServiceImpl implements TextProcessorService {
+	private static final String PARAGRAPH="Paragraph";
 
 	@Override
 	public Text changeFirstAndLastWordInSentance(Text text) {
 
 		for (PartText partText : text.getTextElements()) {
-			if (partText.getClass().getSimpleName().equalsIgnoreCase("Paragraph".trim())) {
+			if (partText.getClass().getSimpleName().equalsIgnoreCase(PARAGRAPH)) {
 				for (PartText sentance : ((Paragraph) partText).getSentances()) {
 					changeFirstAndLastWord((Sentance) sentance);
 				}
@@ -39,7 +40,7 @@ public class TextProcessorServiceImpl implements TextProcessorService {
 	public String deliteMaxSubstring(Text text, String begin, String end) {
 		int maxSubstring = 0;
 		for (PartText partText : text.getTextElements()) {
-			if (partText.getClass().getSimpleName().equalsIgnoreCase("Paragraph".trim())) {
+			if (partText.getClass().getSimpleName().equalsIgnoreCase(PARAGRAPH)) {
 				for (PartText sentance : ((Paragraph) partText).getSentances()) {
 					String unitedWords = doSentanceFromWords((Sentance) sentance);
 					int beginIndex = unitedWords.indexOf( begin);
@@ -67,7 +68,7 @@ public class TextProcessorServiceImpl implements TextProcessorService {
 
 	private String deliteSubstring(Text text, int maxSubstring, String begin, String end) {
 		for (PartText partText : text.getTextElements()) {
-			if (partText.getClass().getSimpleName().equalsIgnoreCase("Paragraph".trim())) {
+			if (partText.getClass().getSimpleName().equalsIgnoreCase(PARAGRAPH)) {
 				for (PartText sentance : ((Paragraph) partText).getSentances()) {
 					String unitedWords = doSentanceFromWords((Sentance) sentance);
 					int beginIndex = unitedWords.indexOf( begin);

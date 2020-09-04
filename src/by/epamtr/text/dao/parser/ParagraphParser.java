@@ -1,4 +1,4 @@
-package by.epamtr.text.dao.impl;
+package by.epamtr.text.dao.parser;
 
 import java.util.ArrayList;
 import java.util.List;

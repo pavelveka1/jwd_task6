@@ -1,8 +1,8 @@
 package by.epamtr.text.dao;
 
-import by.epamtr.text.dao.impl.ParagraphParser;
-import by.epamtr.text.dao.impl.SentanceParser;
-import by.epamtr.text.dao.impl.TextParser;
+import by.epamtr.text.dao.parser.ParagraphParser;
+import by.epamtr.text.dao.parser.SentanceParser;
+import by.epamtr.text.dao.parser.TextParser;
 
 public class TextParserDAOFactory {
 	private static final TextParserDAOFactory instance = new TextParserDAOFactory();

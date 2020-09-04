@@ -6,23 +6,18 @@ public class ServerControllerException extends Exception {
 
 	public ServerControllerException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public ServerControllerException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public ServerControllerException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	public ServerControllerException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
-	
 
 }

@@ -1,21 +1,14 @@
-package by.epamtr.text.dao.impl;
+package by.epamtr.text.dao.parser;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import by.epamtr.text.dao.PartTextDAOFactory;
 import by.epamtr.text.dao.PartTextParserDAO;
-import by.epamtr.text.dao.TextParserDAOFactory;
 import by.epamtr.text.dao.exception.DAOException;
 import by.epamtr.text.entity.PartText;
 import by.epamtr.text.entity.Sentance;
@@ -23,7 +16,6 @@ import by.epamtr.text.entity.Word;
 
 public class TextParser implements PartTextParserDAO {
 	private PartTextDAOFactory factory;
-	private TextParserDAOFactory parserFactory;
 	static BufferedReader reader;
 	private Matcher matcher;
 	Iterator<String> iterator;
@@ -43,7 +35,7 @@ public class TextParser implements PartTextParserDAO {
 
 		iterator = listOfString.iterator();
 		while (iterator.hasNext()) {
-			line = (String) iterator.next();
+			line = iterator.next();
 
 			try {
 				if (line.contains("{")) {
@@ -147,7 +139,7 @@ public class TextParser implements PartTextParserDAO {
 	}
 
 	private List<String> devideTextOnString(String wholeText) {
-		List<String> listOfString = Arrays.asList(wholeText.split("\n"));
+		List<String> listOfString = Arrays.asList(wholeText.split("\\n"));
 		for (int i = 0; i < listOfString.size(); i++) {
 			listOfString.set(i, listOfString.get(i) + "\\n");
 		}
